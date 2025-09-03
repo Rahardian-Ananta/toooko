@@ -1,0 +1,26 @@
+[
+  {
+    "id": "img001",
+    "name": "Anime Avatar Pack",
+    "price": 15000,
+    "cover": "https://picsum.photos/seed/anime/600/400",
+    "file": "assets/digital/anime-pack.zip",
+    "description": "Paket 20 avatar anime siap pakai (PNG 1024x1024)."
+  },
+  {
+    "id": "img002",
+    "name": "Watercolor Backgrounds",
+    "price": 20000,
+    "cover": "https://picsum.photos/seed/watercolor/600/400",
+    "file": "assets/digital/watercolor-pack.zip",
+    "description": "10 background watercolor high-res (JPG 4K)."
+  },
+  {
+    "id": "img003",
+    "name": "Icon Set Minimalist",
+    "price": 12000,
+    "cover": "https://picsum.photos/seed/icons/600/400",
+    "file": "assets/digital/icons-pack.zip",
+    "description": "80 ikon minimalis (SVG + PNG)."
+  }
+]
