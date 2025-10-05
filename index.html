@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Komik Viewer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; }
+    .card img { max-width: 100%; border-radius: 5px; }
+    .title { font-size: 14px; margin-top: 8px; font-weight: bold; }
+    .back { margin: 10px 0; cursor: pointer; color: blue; text-decoration: underline; }
+    .chapter { cursor: pointer; color: green; margin: 5px 0; }
+    .reader img { max-width: 100%; margin-bottom: 10px; display: block; }
+    .nav-btn, .page-btn { margin: 10px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; background: #f5f5f5; }
+    .nav-btn:hover, .page-btn:hover { background: #e0e0e0; }
+    .pagination { text-align: center; margin-top: 20px; }
+    .current-page { font-weight: bold; padding: 0 10px; }
+  </style>
+</head>
+<body>
+  <h1 id="header">Daftar Komik (Manhwa)</h1>
+  <div id="app"></div>
+
+  <script>
+    const BASE_URL = "https://raw.githubusercontent.com/Rahardian-Ananta/Dbkomik/main";
+    let currentPage = 6;
+
+    async function loadPage(page = 1) {
+      document.getElementById("header").innerText = "Daftar Komik (Manhwa)";
+      const app = document.getElementById("app");
+      app.innerHTML = "<p>Loading...</p>";
+      
+      try {
+        const res = await fetch(`${BASE_URL}/page_${page}.json`);
+        if (!res.ok) throw new Error("Halaman tidak ditemukan");
+        const data = await res.json();
+        currentPage = page;
+
+        app.innerHTML = '<div class="grid"></div>';
+        const grid = app.querySelector(".grid");
+
+        data.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${item.thumbnail}" alt="${item.judul}">
+            <div class="title">${item.judul}</div>
+          `;
+          card.onclick = () => loadInfo(item.slug);
+          grid.appendChild(card);
+        });
+
+        // Pagination control
+        const pagination = document.createElement("div");
+        pagination.className = "pagination";
+        pagination.innerHTML = `
+          ${page > 1 ? `<button class="page-btn" onclick="loadPage(${page - 1})">⬅ Prev Page</button>` : ""}
+          <span class="current-page">Page ${page}</span>
+          <button class="page-btn" onclick="loadPage(${page + 1})">Next Page ➡</button>
+        `;
+        app.appendChild(pagination);
+      } catch (err) {
+        app.innerHTML = `
+          <p>Halaman tidak ditemukan atau sudah habis.</p>
+          ${page > 1 ? `<button class="page-btn" onclick="loadPage(${page - 1})">⬅ Kembali ke Page ${page - 1}</button>` : ""}
+        `;
+      }
+    }
+
+    async function loadInfo(slug) {
+      document.getElementById("header").innerText = "Detail Komik";
+      const res = await fetch(`${BASE_URL}/${slug}/info.json`);
+      const info = await res.json();
+
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="back" onclick="loadPage(${currentPage})">← Kembali</div>
+        <h2>${info.judul}</h2>
+        <img src="${info.thumbnail}" alt="${info.judul}">
+        <p><b>Author:</b> ${info.author}</p>
+        <p><b>Artist:</b> ${info.artist}</p>
+        <p><b>Status:</b> ${info.status}</p>
+        <p><b>Rating:</b> ${info.rating}</p>
+        <p><b>Genre:</b> ${info.genre.join(", ")}</p>
+        <p>${info.synopsis}</p>
+        <h3>Chapters</h3>
+        <div id="chapters"></div>
+      `;
+
+      const chapterList = document.getElementById("chapters");
+      info.chapters.forEach((ch, idx) => {
+        const div = document.createElement("div");
+        div.className = "chapter";
+        div.innerText = `Chapter ${idx + 1}`;
+        div.onclick = () => loadChapter(slug, info.chapters, idx);
+        chapterList.appendChild(div);
+      });
+    }
+
+    async function loadInfo(slug) {
+  document.getElementById("header").innerText = "Detail Komik";
+  const res = await fetch(`${BASE_URL}/${slug}/info.json`);
+  const info = await res.json();
+
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="back" onclick="loadPage(${currentPage})">← Kembali</div>
+    <div class="info">
+      <h2>${info.judul}</h2>
+      <img src="${info.thumbnail}" alt="${info.judul}">
+      <p><b>Tipe:</b> ${info.tipe || "Unknown"}</p>
+      <p><b>Released:</b> ${info.released || "Unknown"}</p>
+      <p><b>Author:</b> ${info.author || "-"}</p>
+      <p><b>Artist:</b> ${info.artist || "-"}</p>
+      <p><b>Status:</b> ${info.status || "-"}</p>
+      <p><b>Rating:</b> ${info.rating || "-"}</p>
+      <p><b>Genre:</b> ${Array.isArray(info.genre) ? info.genre.join(", ") : "-"}</p>
+      <p><b>Sinopsis:</b> ${info.synopsis || "Tidak ada sinopsis."}</p>
+    </div>
+    <h3>Chapters</h3>
+    <div id="chapters"></div>
+  `;
+
+  const chapterList = document.getElementById("chapters");
+  if (info.chapters && info.chapters.length > 0) {
+    info.chapters.forEach((ch, idx) => {
+      const div = document.createElement("div");
+      div.className = "chapter";
+      div.innerText = `Chapter ${idx + 1}`;
+      div.onclick = () => loadChapter(slug, info.chapters, idx);
+      chapterList.appendChild(div);
+    });
+  } else {
+    chapterList.innerHTML = "<p>Tidak ada chapter.</p>";
+  }
+}
+
+    // Jalankan halaman pertama
+    loadPage(currentPage);
+  </script>
+</body>
+</html>
